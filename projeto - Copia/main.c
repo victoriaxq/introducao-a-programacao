@@ -57,6 +57,8 @@ int main() {
     int flagParado = 0;
     int contadorOndas = 1;
 
+    InitAudioDevice();
+
     Rectangle paredes[4] = {{0, 0, 215, WINDOW_HEIGHT},
     {0, 0, WINDOW_WIDTH, 140},
     {0, 425, WINDOW_WIDTH, WINDOW_HEIGHT - 425},
@@ -65,11 +67,22 @@ int main() {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "teste");
     SetTargetFPS(60);
     Texture mapa = LoadTexture("assets/Level_0.png");
+
+    //efeitos sonoros
+    Sound musicaFundo = LoadSound("assets/musicafundo.mp3");
+    Sound playersoundAtaque =LoadSound("assets/playerataque.mp3");
+    Sound morcegoAtingido = LoadSound("assets/morcegoatingido.mp3");
+    Sound esqueletoAtingido =LoadSound("assets/esqueletoAtingido.mp3");
+    Sound sapoAtingido =LoadSound("assets/sapoAtingido.mp3");
+    Sound fantasmaAtingido = LoadSound("assents/fantasmaAtingido.mp3");
+    PlaySound(musicaFundo);
+
     //morcego
-    Texture2D morcego = LoadTexture("assets/skeleton.png");
+    Texture2D morcego = LoadTexture("assets/bat.png");
     int maxFramesMorcego = 3;
     float timer = 0.0f;
     int frameMorcego = 0;
+
     // Jogador
     Texture2D personagem = LoadTexture("assets/Player_Idle_Run_Stop.png");
     Texture2D personagemParado = LoadTexture("assets/Player_Idle_Run_Stop.png");
@@ -106,8 +119,11 @@ int main() {
         numinimigos++;
     }
     while(!WindowShouldClose()) {
-    hitbox.x = player.position.x;
-    hitbox.y = player.position.y;
+
+        
+       
+        hitbox.x = player.position.x;
+        hitbox.y = player.position.y;
         timer += GetFrameTime();
           if(timer >= 0.2f){
             timer = 0.0f;
@@ -148,31 +164,46 @@ int main() {
             if(IsKeyUp(KEY_A) && IsKeyUp(KEY_D) && IsKeyUp(KEY_W) && IsKeyUp(KEY_S) && flagMovimento == 1){
                 flagParado = 2;
             }
+            
+            
+
             if(IsKeyDown(KEY_DOWN) && atkdelay <= 0) {
+                
                 // valores importantes, nao alterar
                 playerattack.x = player.position.x - 10;
                 playerattack.y = player.position.y + 15;
+                PlaySound(playersoundAtaque);
                 // valores importantes
                 atkdelay = player.atkspeed;
                 atktime = 20;
+                
             }
             if(IsKeyDown(KEY_UP) && atkdelay <= 0) {
+                
                 playerattack.x = player.position.x - 10;
                 playerattack.y = player.position.y - 35;
+                PlaySound(playersoundAtaque);
                 atkdelay = player.atkspeed;
                 atktime = 20;
+               
             }
             if(IsKeyDown(KEY_RIGHT) && atkdelay <= 0) {
+                
                 playerattack.x = player.position.x + 45;
                 playerattack.y = player.position.y + 20;
+                PlaySound(playersoundAtaque);
                 atkdelay = player.atkspeed;
                 atktime = 20;
+                
             }
             if(IsKeyDown(KEY_LEFT) && atkdelay <= 0) {
+                
                 playerattack.x = player.position.x + 8;
                 playerattack.y = player.position.y + 20;
+                PlaySound(playersoundAtaque);
                 atkdelay = player.atkspeed;
                 atktime = 20;
+                
             }
 
             if(atkdelay) {
@@ -190,6 +221,7 @@ int main() {
                     for(int x = i + 1; x < numinimigos && flag1; x++) {
                         if(CheckCollisionCircles(enemies[x].position, enemies[x].size, enemies[i].position, enemies[i].size)) {
                             flag1 = 0;
+                            
                         } 
                     }
                     if(flag1) {
@@ -231,6 +263,7 @@ int main() {
                     gamestate = 1;
                 }
                 if(CheckCollisionCircleRec(enemies[i].position, enemies[i].size, playerattack) && atktime > 0) {
+                    PlaySound(morcegoAtingido);
                     enemies = remover(enemies, i, &numinimigos);
                     if(numinimigos <= 0) {
                         gamestate = 2; 
@@ -331,6 +364,13 @@ int main() {
     UnloadTexture(morcego);
     UnloadTexture(mapa);
     free(enemies);
+    UnloadSound(playersoundAtaque); 
+    UnloadSound(morcegoAtingido);
+    UnloadSound(fantasmaAtingido);
+    UnloadSound(sapoAtingido);
+    UnloadSound(esqueletoAtingido);
+    UnloadSound(musicaFundo);
+    CloseAudioDevice();
     CloseWindow();
 
     return 0;
