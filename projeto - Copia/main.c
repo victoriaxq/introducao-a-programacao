@@ -52,7 +52,7 @@ float norm(float v, float y) {
 
 int main() {
 
-    int gamestate = 0;
+    int gamestate = -1;
     int numinimigos = 0;
     int flagMovimento = 0;
     int flagAtaque = 0;
@@ -79,6 +79,10 @@ int main() {
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "teste");
     SetTargetFPS(60);
+    //menu
+    Texture2D menu = LoadTexture("assets/menu.png");
+    Texture2D perdeu = LoadTexture("assets/perdeu.png");
+    Texture2D ganhou = LoadTexture("assets/ganhou.png");
     //mapa
     Texture mapa = LoadTexture("assets/Level_0.png");
     //barra de vida
@@ -163,6 +167,17 @@ int main() {
          frameMorcego = frameMorcego % maxFramesMorcego;
          framePlayer = framePlayer % maxFramesPlayer;
          frameMorte = frameMorte % maxFramesMorte;
+
+        if(gamestate == -1){
+            BeginDrawing();
+                DrawTexture(menu, 0, 0, WHITE);
+            EndDrawing();
+
+            if(IsKeyDown(KEY_ENTER)){
+                gamestate = 0;
+            }
+        }
+
         if(gamestate == 0) {
             // Codigo
 
@@ -421,7 +436,7 @@ int main() {
                 ClearBackground(GRAY);
                 DrawTexture(mapa, 0, 0, WHITE);
                 DrawTextureRec(mortePersonagem, (Rectangle){(mortePersonagem.width/maxFramesMorte) * frameMorte, mortePersonagem.height/2, mortePersonagem.width/maxFramesMorte, mortePersonagem.height/2}, (Vector2){player.position.x, player.position.y}, WHITE);
-                DrawText("bruh", player.position.x, player.position.y, 30.0f, MAROON) ;
+                DrawTexture(perdeu, 0, 0, WHITE);
             EndDrawing();
         }
 
@@ -456,11 +471,19 @@ int main() {
         else if(gamestate == 3){
             BeginDrawing();
                 ClearBackground(GREEN);
-                DrawText("LESGO", player.position.x, player.position.y, 30.0f, DARKGREEN) ;
+                DrawTexture(ganhou, 0, 0, WHITE);
             EndDrawing();
+
+            //voltar pro menu
+            /* if(IsKeyDown(KEY_ENTER)){
+                gamestate = -1;
+            }  */
         }
 
     }
+    UnloadTexture(menu);
+    UnloadTexture(ganhou);
+    UnloadTexture(perdeu);
     UnloadTexture(personagem);
     UnloadTexture(personagemInvertido);
     UnloadTexture(personagemParado);
