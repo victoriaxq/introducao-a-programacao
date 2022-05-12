@@ -50,7 +50,7 @@ int *Kill(Enemy *enemies, int id, int * numinimigos) {
 
 int main() {
 
-    int gamestate = 0;
+    int gamestate = -1;
     int numinimigos = 0;
     int flagMovimento = 0;
     int flagAtaque = 0;
@@ -67,7 +67,10 @@ int main() {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "teste");
     SetTargetFPS(60);
     Texture mapa = LoadTexture("assets/Level_0.png");
-
+    //menu   
+    Texture menu = LoadTexture("assets/fundo.png");
+    //Font font = LoadFont("resources/fonts/alagard.ttf");
+    //Font font2 = LoadFont("assets/VCR_OSD_MONO_1.001.ttf");
     //efeitos sonoros
     Sound musicaFundo = LoadSound("assets/musicafundo.mp3");
     Sound playersoundAtaque =LoadSound("assets/playerataque.mp3");
@@ -132,6 +135,23 @@ int main() {
         }
          frameMorcego = frameMorcego % maxFramesMorcego;
          framePlayer = framePlayer % maxFramesPlayer;
+
+        //menu
+        if(gamestate == -1){
+            
+            BeginDrawing(); 
+                DrawTexture(menu, 0, 0, WHITE);
+                DrawText("ONE (K)NIGHT IN A DUNGEON", WINDOW_WIDTH/7, 2*WINDOW_HEIGHT/6, 45, YELLOW);
+                DrawText("Seu objetivo é combater todos os inimigos e, claro, sobreviver!", WINDOW_WIDTH/7, 3*WINDOW_HEIGHT/6, 20,RED);
+                DrawText("Use as teclas WASD para se movimentar, use as SETAS para atacar!",  WINDOW_WIDTH/7, 4*WINDOW_HEIGHT/6, 20, YELLOW);
+                DrawText("Aperte a tecla ENTER para jogar!", 2*WINDOW_WIDTH/7, 5*WINDOW_HEIGHT/6, 20, YELLOW);
+            EndDrawing();
+
+            if(IsKeyDown(KEY_ENTER)){
+                gamestate = 0;
+            }
+        }
+
         if(gamestate == 0) {
             // Codigo
 
@@ -320,8 +340,9 @@ int main() {
                 gamestate = 0;
             }
             BeginDrawing();
-                ClearBackground(RED);
-                DrawText("bruh", player.position.x, player.position.y, 30.0f, MAROON) ;
+                DrawTexture(menu, 0, 0, WHITE);
+                DrawText("Não foi dessa vez...", WINDOW_WIDTH/3, 3*WINDOW_HEIGHT/6, 30, YELLOW);
+                 DrawText("ENTER para tentar novamente", (WINDOW_WIDTH - 20)/3, 4*WINDOW_HEIGHT/6, 20, YELLOW);
             EndDrawing();
         }
 
@@ -358,6 +379,7 @@ int main() {
         }
 
     }
+    UnloadTexture(menu);
     UnloadTexture(personagem);
     UnloadTexture(personagemInvertido);
     UnloadTexture(personagemParado);
