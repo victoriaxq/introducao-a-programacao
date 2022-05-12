@@ -56,8 +56,8 @@ int main() {
     int numinimigos = 0;
     int flagMovimento = 0;
     int flagAtaque = 0;
-    int flagParado = 0;
-    int contadorOndas = 1;
+    int flagParado = 1;
+    int contadorOndas = 0;
     int flagMorte = 0;
     int flagDefesa = 0;
 
@@ -93,18 +93,22 @@ int main() {
 
     //efeitos sonoros
     Sound musicaFundo = LoadSound("assets/musicafundo.mp3");
-    Sound playersoundAtaque =LoadSound("assets/playerataque.mp3");
+    Sound playersoundAtaque = LoadSound("assets/playerataque.mp3");
     Sound morcegoAtingido = LoadSound("assets/morcegoatingido.mp3");
-    Sound esqueletoAtingido =LoadSound("assets/esqueletoAtingido.mp3");
-    Sound sapoAtingido =LoadSound("assets/sapoAtingido.mp3");
+    Sound esqueletoAtingido = LoadSound("assets/esqueletoAtingido.mp3");
+    Sound sapoAtingido = LoadSound("assets/sapoAtingido.mp3");
     Sound fantasmaAtingido = LoadSound("assents/fantasmaAtingido.mp3");
     PlaySound(musicaFundo);
 
-    //morcego
+    //morcego - 0
     Texture2D morcego = LoadTexture("assets/bat.png");
     int maxFramesMorcego = 3;
     float timer = 0.0f;
     int frameMorcego = 0;
+
+    //morcego - 1
+
+
 
     // Jogador
     Texture2D personagem = LoadTexture("assets/Player_Idle_Run_Stop.png");
@@ -139,16 +143,6 @@ int main() {
     // Inimigo teste
     Enemy *enemies = (Enemy*) calloc(5, sizeof(Enemy));
     int atkdelayInimigo = 0;
-    for(int i = 0; i < 5; i++) {
-        enemies[i].speed = 1.0f;
-        enemies[i].size = 4;
-        enemies[i].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
-        enemies[i].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
-        enemies[i].atkspeed = 40;
-        enemies[i].type = i % 2;
-        enemies[i].atkspeed = 60;
-        numinimigos++;
-    }
     while(!WindowShouldClose()) {
 
         
@@ -167,14 +161,14 @@ int main() {
          frameMorcego = frameMorcego % maxFramesMorcego;
          framePlayer = framePlayer % maxFramesPlayer;
          frameMorte = frameMorte % maxFramesMorte;
-
+        // Menu
         if(gamestate == -1){
             BeginDrawing();
                 DrawTexture(menu, 0, 0, WHITE);
             EndDrawing();
 
-            if(IsKeyDown(KEY_ENTER)){
-                gamestate = 0;
+            if(IsKeyPressed(KEY_ENTER)){
+                gamestate = 2;
             }
         }
 
@@ -339,6 +333,35 @@ int main() {
                         }
                     }
                 }
+                //Tipo 2: Amanda está trabalhando nesse aqui
+                /*else if(enemies[i].type == 2) {
+                    int flag2;
+                    if(enemies[i].atkspeed >= 0) {
+                        if(projnum < PROJ_MAX) {
+                            projectiles[projnum].position = enemies[i].position;
+                            projectiles[projnum].size = 5;
+                            projectiles[projnum].speed.x = norm(player.position.x + 30 - enemies[i].position.x, player.position.y + 25 - enemies[i].position.y);
+                            projectiles[projnum].speed.y = norm(player.position.y + 25 - enemies[i].position.y, player.position.x + 30 - enemies[i].position.x);
+                            projnum++;
+                            enemies[i].atkspeed = 60;
+                        }
+                    }
+                    else {
+                        //pular na direcao do jogador
+                        int flag2;
+                        enemies[i].atkspeed -= 1;
+                        float cos = norm(player.position.x,player.position.y);
+                        while(enemies[i].position.x !=30*cos){
+                            if(player.position.x + 30 > enemies[i].position.x){
+                                for(int x = i +1; x < numinimigos && flag1; x++){
+                                    if(CheckCollisionCircles(enemies[x].position, enemies[x].size, enemies[i].position, enemies[i].size)) {
+                                        flag2 = 0;
+                                    }     
+                                }
+                            }
+                        }
+                    }    
+                }*/
             }
 
             //Projeteis
@@ -405,32 +428,18 @@ int main() {
                 for(int i = 0; i < numinimigos; i++) {
                     DrawTextureRec(morcego, (Rectangle){(morcego.width/3)*frameMorcego, 0, morcego.width/3,morcego.height},(Vector2){enemies[i].position.x, enemies[i].position.y}, WHITE);
                 }    
+                DrawText(TextFormat("%d/10", contadorOndas), 50, 300, 30, WHITE);
             EndDrawing();
         }
 
         else if(gamestate == 1) {
             if(IsKeyPressed(KEY_ENTER)) {
-                contadorOndas = 1;
-                flagMorte = 0;
-                framesVida = 0;
+                contadorOndas = 0;
+                projnum = 0;
+                numinimigos = 0;
                 player.health = 5;
-                player.position.x = 250;
-                player.position.y = 250;
-                enemies = (Enemy*)realloc(enemies, 5 * sizeof(Enemy));
-                if(enemies == NULL)exit(1);
-                for(int i = 0; i < 5; i++) {
-                    enemies[i].speed = 1.0f;
-                    enemies[i].size = 4;
-                    enemies[i].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
-                    enemies[i].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
-                    enemies[i].atkspeed = 40;
-                    enemies[i].type = i % 2;
-                    enemies[i].atkspeed = 60;
-                    numinimigos++;
-                }
-                atkdelay = 0;
-                atktime = 0;
-                gamestate = 0;
+                framesVida = 0;
+                gamestate = -1;
             }
             BeginDrawing();
                 ClearBackground(GRAY);
@@ -440,50 +449,89 @@ int main() {
             EndDrawing();
         }
 
+        // Espaço entre Ondas
         else if(gamestate == 2) {
-            if(IsKeyPressed(KEY_ENTER)) {
-                contadorOndas++;
-                player.position.x = 250;
-                player.position.y = 250;
-                enemies = (Enemy*) realloc(enemies, (5*contadorOndas) * sizeof(Enemy));
-                if(enemies == NULL) exit(1);
-                for(int i = 0; i < 5 * contadorOndas; i++) {
-                    enemies[i].speed = 1.0f;
-                    enemies[i].size = 4;
-                    enemies[i].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
-                    enemies[i].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
-                    enemies[i].atkspeed = 40;
-                    enemies[i].type = i % 2;
-                    enemies[i].atkspeed = 60;
-                    numinimigos++;
+            
+            projnum = 0;
+            contadorOndas++;
+            int wavetime = 180;
+            int pontosinimigo = 5 + contadorOndas * 3;
+            while(pontosinimigo > 0) {
+                int novoinimigo = GetRandomValue(1, 3);
+                switch(novoinimigo)
+                {
+                    case 1 : //Morcego-0
+                        if(pontosinimigo >= 1 ){
+                            pontosinimigo = pontosinimigo - 1;
+                            numinimigos++;
+                            enemies = (Enemy*) realloc(enemies, numinimigos * sizeof(Enemy));
+                            if(enemies == NULL) exit(1);
+                            enemies[numinimigos - 1].type = 0;
+                            enemies[numinimigos - 1].size = 4;
+                            enemies[numinimigos - 1].speed = 1.0f;
+                            enemies[numinimigos - 1].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
+                            enemies[numinimigos -1].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
+                        }
+                    break;
+                    case 2 : //Morcego-1
+                        if(pontosinimigo >= 3 ){
+                            pontosinimigo = pontosinimigo - 3;
+                            numinimigos++;
+                            enemies = (Enemy*) realloc(enemies, numinimigos * sizeof(Enemy));
+                            if(enemies == NULL) exit(1);
+                            enemies[numinimigos - 1].type = 1;
+                            enemies[numinimigos - 1].size = 4;
+                            enemies[numinimigos - 1].atkspeed = 60;
+                            enemies[numinimigos - 1].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
+                            enemies[numinimigos - 1].position.y = GetRandomValue(90, WINDOW_HEIGHT - 135);
+                        }
+                    break;
+                    case 3 : //Morcego-2 Teste pra um terceiro tipo de inimigo.
+                        // É um morcego que se move duas vezes mais rápido, se quiser testar tira o comentário.
+                        /*if(pontosinimigo >= 4){
+                            pontosinimigo = pontosinimigo - 4;
+                            numinimigos++;
+                            enemies = (Enemy*) realloc(enemies, numinimigos * sizeof(Enemy));
+                            if(enemies == NULL) exit(1);
+                            enemies[numinimigos - 1].type = 0;
+                            enemies[numinimigos - 1].size = 4;
+                            enemies[numinimigos - 1].speed = 2.0f;
+                            enemies[numinimigos - 1].atkspeed = 60;
+                            enemies[numinimigos - 1].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
+                            enemies[numinimigos - 1].position.y = GetRandomValue(90, WINDOW_HEIGHT - 135);
+
+                        }*/
+                    break;
+                    //case 4 : //Sapo
+                    
+                    
                 }
-                atkdelay = 0;
-                atktime = 0;
-                gamestate = 0;
-            if(contadorOndas == 10){
-                gamestate = 3;
             }
+
+            while(wavetime > 0) {
+                wavetime--;
             }
+            gamestate = 0;
+
             BeginDrawing();
             DrawText("PROXIMA ONDA A CAMINHO", WINDOW_WIDTH/2, WINDOW_HEIGHT/2, 30, WHITE);
             EndDrawing();
         }
         else if(gamestate == 3){
+
+            if(IsKeyDown(KEY_ENTER)){
+                gamestate = -1;
+            }
+
             BeginDrawing();
                 ClearBackground(GREEN);
                 DrawTexture(ganhou, 0, 0, WHITE);
             EndDrawing();
-
-            //voltar pro menu
-            /* if(IsKeyDown(KEY_ENTER)){
-                gamestate = -1;
-            }  */
         }
 
     }
-    UnloadTexture(menu);
-    UnloadTexture(ganhou);
-    UnloadTexture(perdeu);
+
+    //Unloading
     UnloadTexture(personagem);
     UnloadTexture(personagemInvertido);
     UnloadTexture(personagemParado);
@@ -492,6 +540,9 @@ int main() {
     UnloadTexture(ataque);
     UnloadTexture(ataqueInvertido);
     UnloadTexture(mortePersonagem);
+    UnloadTexture(menu);
+    UnloadTexture(perdeu);
+    UnloadTexture(ganhou);
     free(enemies);
     UnloadSound(playersoundAtaque); 
     UnloadSound(morcegoAtingido);
