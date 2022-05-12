@@ -143,7 +143,7 @@ int main() {
         enemies[i].speed = 1.0f;
         enemies[i].size = 4;
         enemies[i].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
-        enemies[i].position.y = GetRandomValue(65, WINDOW_HEIGHT - 135);
+        enemies[i].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
         enemies[i].atkspeed = 40;
         enemies[i].type = i % 2;
         enemies[i].atkspeed = 60;
@@ -318,7 +318,7 @@ int main() {
                 // Tipo 1: Dispara projeteis no jogador
                 else if(enemies[i].type == 1) {
                     if(enemies[i].atkspeed <= 0) {
-                        if(projnum <= PROJ_MAX) {
+                        if(projnum < PROJ_MAX) {
                             projectiles[projnum].position = enemies[i].position;
                             projectiles[projnum].size = 5;
                             projectiles[projnum].speed.x = norm(player.position.x + 30 - enemies[i].position.x, player.position.y + 25 - enemies[i].position.y);
@@ -422,7 +422,7 @@ int main() {
                     enemies[i].speed = 1.0f;
                     enemies[i].size = 4;
                     enemies[i].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
-                    enemies[i].position.y = GetRandomValue(65, WINDOW_HEIGHT - 135);
+                    enemies[i].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
                     enemies[i].atkspeed = 40;
                     enemies[i].type = i % 2;
                     enemies[i].atkspeed = 60;
@@ -451,7 +451,7 @@ int main() {
                     enemies[i].speed = 1.0f;
                     enemies[i].size = 4;
                     enemies[i].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
-                    enemies[i].position.y = GetRandomValue(65, WINDOW_HEIGHT - 135);
+                    enemies[i].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
                     enemies[i].atkspeed = 40;
                     enemies[i].type = i % 2;
                     enemies[i].atkspeed = 60;
