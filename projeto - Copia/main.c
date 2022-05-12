@@ -15,7 +15,7 @@ typedef struct {
 
 typedef struct {
     Vector2 position;
-    float speed, size;
+    float speed, size, atkspeed;
     int health, type;
 } Enemy;
 
@@ -56,6 +56,7 @@ int main() {
     int flagAtaque = 0;
     int flagParado = 0;
     int contadorOndas = 1;
+    int flagMorte = 0;
 
     InitAudioDevice();
 
@@ -66,7 +67,13 @@ int main() {
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "teste");
     SetTargetFPS(60);
+    //mapa
     Texture mapa = LoadTexture("assets/Level_0.png");
+    //barra de vida
+    Texture2D vida = LoadTexture("assets/barra_de_vida_.png");
+    int framesVida = 0;
+    int maxFramesVida = 6;
+
 
     //efeitos sonoros
     Sound musicaFundo = LoadSound("assets/musicafundo.mp3");
@@ -87,11 +94,15 @@ int main() {
     Texture2D personagem = LoadTexture("assets/Player_Idle_Run_Stop.png");
     Texture2D personagemParado = LoadTexture("assets/Player_Idle_Run_Stop.png");
     Texture2D personagemInvertido = LoadTexture("assets/cavaleiro_invertido.png");
+    Texture2D mortePersonagem = LoadTexture("assets/PlayerHit_Death.png");
     int maxFramesPlayer = 4;
     int framePlayer = 0;
+    int frameMorte = 0;
+    int maxFramesMorte = 12;
     Player player;
     player.speed = 2.0f;
     player.size = 8;
+    player.health = 5;
     player.position.x = 250;
     player.position.y = 250;
     player.atkspeed = 40;
@@ -111,11 +122,13 @@ int main() {
     playerattack.y = 0;
     // Inimigo teste
     Enemy *enemies = (Enemy*) calloc(5, sizeof(Enemy));
+    int atkdelayInimigo = 0;
     for(int i = 0; i < 5; i++) {
         enemies[i].speed = 1.0f;
         enemies[i].size = 4;
         enemies[i].position.x = rand() % WINDOW_WIDTH;
         enemies[i].position.y = rand() % WINDOW_HEIGHT;
+        enemies[i].atkspeed = 40;
         numinimigos++;
     }
     while(!WindowShouldClose()) {
@@ -129,9 +142,13 @@ int main() {
             timer = 0.0f;
             frameMorcego += 1;
             framePlayer += 1;
+            if(flagMorte == 1){
+                frameMorte++;
+            }
         }
          frameMorcego = frameMorcego % maxFramesMorcego;
          framePlayer = framePlayer % maxFramesPlayer;
+         frameMorte = frameMorte % maxFramesMorte;
         if(gamestate == 0) {
             // Codigo
 
@@ -209,6 +226,9 @@ int main() {
             if(atkdelay) {
                 atkdelay--;
             }
+            if(atkdelayInimigo) {
+                atkdelayInimigo--;
+            }
 
             if(atktime) {
                 atktime--;
@@ -259,8 +279,15 @@ int main() {
                     }
                 }
 
-                if(CheckCollisionCircles((Vector2){player.position.x + 30, player.position.y + 25} , player.size, enemies[i].position, enemies[i].size)) {
+                if(CheckCollisionCircles((Vector2){player.position.x + 30, player.position.y + 25} , player.size, enemies[i].position, enemies[i].size) && atkdelayInimigo <= 0) {\
+                    atkdelayInimigo = 40;
+                    player.health--;
+                    framesVida++;
+                    framesVida = framesVida % maxFramesVida;
+                    if(player.health == 0){
                     gamestate = 1;
+                    flagMorte = 1;
+                    }
                 }
                 if(CheckCollisionCircleRec(enemies[i].position, enemies[i].size, playerattack) && atktime > 0) {
                     PlaySound(morcegoAtingido);
@@ -273,8 +300,9 @@ int main() {
             // Desenho 
             BeginDrawing(); 
                 ClearBackground(GRAY);
+                DrawTextureRec(vida, (Rectangle){60, (vida.height/6)*framesVida, vida.width, vida.height/6}, (Vector2){0, 0}, WHITE);
                 DrawTexture(mapa, 0, 0, WHITE);
-                DrawText(TextFormat("%d", atktime), 0, 0, 30, BLACK);
+                // DrawText(TextFormat("%d", atktime), 0, 0, 30, BLACK);
                 if(atktime > 0) {
                     if(flagMovimento == 0)
                     DrawTextureRec(ataque, (Rectangle){(ataque.width/4)*framePlayer, 0, ataque.width/4, ataque.height/7},(Vector2){player.position.x, player.position.y}, WHITE);
@@ -304,6 +332,9 @@ int main() {
         else if(gamestate == 1) {
             if(IsKeyPressed(KEY_ENTER)) {
                 contadorOndas = 1;
+                flagMorte = 0;
+                framesVida = 0;
+                player.health = 5;
                 player.position.x = 250;
                 player.position.y = 250;
                 enemies = (Enemy*)realloc(enemies, 5 * sizeof(Enemy));
@@ -320,7 +351,9 @@ int main() {
                 gamestate = 0;
             }
             BeginDrawing();
-                ClearBackground(RED);
+                ClearBackground(GRAY);
+                DrawTexture(mapa, 0, 0, WHITE);
+                DrawTextureRec(mortePersonagem, (Rectangle){(mortePersonagem.width/maxFramesMorte) * frameMorte, mortePersonagem.height/2, mortePersonagem.width/maxFramesMorte, mortePersonagem.height/2}, (Vector2){player.position.x, player.position.y}, WHITE);
                 DrawText("bruh", player.position.x, player.position.y, 30.0f, MAROON) ;
             EndDrawing();
         }
