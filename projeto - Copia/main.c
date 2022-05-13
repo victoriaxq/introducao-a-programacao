@@ -515,7 +515,6 @@ int main() {
                             enemies[numinimigos - 1].atkspeed = 60;
                             enemies[numinimigos - 1].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
                             enemies[numinimigos - 1].position.y = GetRandomValue(90, WINDOW_HEIGHT - 135);
-
                         }*/
                     break;
                     //case 4 : //Sapo
@@ -525,13 +524,121 @@ int main() {
             }
 
             while(wavetime > 0) {
+
+                if(IsKeyDown(KEY_S) && !CheckCollisionRecs(paredes[3], hitbox)) {
+                player.position.y += player.speed;
+                playerattack.y += player.speed;
+                flagParado = 0;
+            }
+            if(IsKeyDown(KEY_W) && !CheckCollisionRecs(paredes[2], hitbox)) {
+                player.position.y -= player.speed;
+                playerattack.y -= player.speed;
+                flagParado = 0;
+            }
+            if(IsKeyDown(KEY_D) && !CheckCollisionRecs(paredes[1], hitbox)) {
+                player.position.x += player.speed;
+                playerattack.x += player.speed;
+                // Mudei flagMovimento pra 1, representando a direita. A condicional é pra ele não virar durante o ataque.
+                if(atktime == 0) {
+                    flagMovimento = 1;
+                }
+                flagParado = 0;
+            }
+            if(IsKeyDown(KEY_A) && !CheckCollisionRecs(paredes[0], hitbox)) {
+                player.position.x -= player.speed;
+                playerattack.x -= player.speed;
+                // Mudei flagMovimento pra -1, representando a esquerda
+                if(atktime == 0) {
+                    flagMovimento = -1;
+                }
+                flagParado = 0;
+            }
+            /*if(IsKeyDown(KEY_E)){
+                flagDefesa = 1;
+            }
+            else{
+                flagDefesa = 0;
+            }*/
+            if(IsKeyDown(KEY_A) && IsKeyDown(KEY_D) && IsKeyDown(KEY_W) && IsKeyDown(KEY_S) && flagMovimento == 1){
+                flagParado = 1;
+                
+            }
+            if(IsKeyDown(KEY_A) && IsKeyDown(KEY_D) && IsKeyDown(KEY_W) && IsKeyDown(KEY_S) && flagMovimento == -1){
+                flagParado = 2;
+                
+            }
+            
+            if(IsKeyDown(KEY_SPACE) && atkdelay <= 0) {
+                if(flagMovimento == 1) {
+                    playerattack.x = player.position.x + 48;
+                    playerattack.y = player.position.y + 20;
+                }
+                if(flagMovimento == -1) {
+                    playerattack.x = player.position.x + 8;
+                    playerattack.y = player.position.y + 20;
+                }
+                PlaySound(playersoundAtaque);
+                atkdelay = player.atkspeed;
+                atktime = 20;
+                
+            }
+
+            if(atkdelay) {
+                atkdelay--;
+            }
+            if(atkdelayInimigo) {
+                atkdelayInimigo--;
+            }
+
+            if(atktime) {
+                atktime--;
+            }
+
+                BeginDrawing();
+                    ClearBackground(GRAY);
+                    DrawTexture(mapa, 0, 0, WHITE);
+                    for(int i = 0; i < numinimigos; i++) {
+                        DrawCircle(enemies[i].position.x, enemies[i].position.y, 10, Fade(RED, 0.01 * ((wavetime % 60) + 1)));
+                    }   
+                    if(atktime > 0) {
+                        DrawRectangleRec(playerattack, BLUE);
+                    }
+                    for(int i = 0; i < projnum; i++) {
+                        DrawCircle(projectiles[i].position.x, projectiles[i].position.y, projectiles[i].size, RED);
+                    }
+                    DrawTextureRec(vida, (Rectangle){60, (vida.height/6)*framesVida, vida.width, vida.height/6}, (Vector2){0, 0}, WHITE);
+                    // DrawText(TextFormat("%d", atktime), 0, 0, 30, BLACK);
+                    if(atktime > 0) {
+                        if(flagMovimento == 1)
+                        DrawTextureRec(ataque, (Rectangle){(ataque.width/4)*framePlayer, 0, ataque.width/4, ataque.height/7},(Vector2){player.position.x, player.position.y}, WHITE);
+                        else if (flagMovimento == -1)
+                        DrawTextureRec(ataqueInvertido, (Rectangle){(ataqueInvertido.width/4)*framePlayer, 0, ataqueInvertido.width/4,ataqueInvertido.height/7},(Vector2){player.position.x, player.position.y}, WHITE);
+                        // DrawRectangle(playerattack.x, playerattack.y, playerattack.width, playerattack.height, GREEN);
+                    }
+                    // DrawCircle(player.position.x, player.position.y, player.size, BLUE);
+                    if(flagMovimento == 1 && atktime <= 0 && flagParado == 0 && flagDefesa == 0){
+                    DrawTextureRec(personagem, (Rectangle){(personagem.width/4)*framePlayer, personagem.height/3, personagem.width/4,personagem.height/3},(Vector2){player.position.x, player.position.y}, WHITE);
+                    }
+                    else if (flagMovimento == -1 && atktime <= 0 && flagParado == 0 && flagDefesa == 0){
+                    DrawTextureRec(personagemInvertido, (Rectangle){(personagemInvertido.width/4)*framePlayer, personagemInvertido.height/3, personagemInvertido.width/4,personagemInvertido.height/3},(Vector2){player.position.x, player.position.y}, WHITE);
+                    }
+                    else if (flagMovimento == -1 && atktime <= 0 && flagParado == 2 && flagDefesa == 0){
+                    DrawTextureRec(personagemInvertido, (Rectangle){(personagemInvertido.width/4)*framePlayer, 0, personagemInvertido.width/4,personagemInvertido.height/3},(Vector2){player.position.x, player.position.y}, WHITE);
+                    }
+                    else if (flagMovimento == 1 && atktime <= 0 && flagParado == 1 && flagDefesa == 0){
+                    DrawTextureRec(personagem, (Rectangle){(personagem.width/4)*framePlayer, 0, personagem.width/4,personagem.height/3},(Vector2){player.position.x, player.position.y}, WHITE);
+                    }
+                    else if (atktime <= 0 && flagDefesa == 1 && flagMovimento == 1){
+                        DrawTextureRec(ataque, (Rectangle){(ataque.width/4)*3, (ataque.height/7) * 6, ataque.width/4, ataque.height/7},(Vector2){player.position.x, player.position.y}, WHITE);
+                    }
+                    else if (atktime <= 0 && flagDefesa == 1 && flagMovimento == -1){
+                        DrawTextureRec(ataqueInvertido, (Rectangle){0, (ataque.height/7) * 6, ataqueInvertido.width/4, ataqueInvertido.height/7},(Vector2){player.position.x, player.position.y}, WHITE);
+                    } 
+                    DrawText(TextFormat("%d/10", contadorOndas), 50, 300, 30, WHITE);
+                EndDrawing();
                 wavetime--;
             }
             gamestate = 0;
-
-            BeginDrawing();
-            DrawText("PROXIMA ONDA A CAMINHO", WINDOW_WIDTH/2, WINDOW_HEIGHT/2, 30, WHITE);
-            EndDrawing();
         }
         else if(gamestate == 3){
 
