@@ -77,7 +77,7 @@ int main() {
     Projectile projectiles[PROJ_MAX];
     int projnum = 0;
 
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "teste");
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "One (k)night in a Dungeon");
     SetTargetFPS(60);
     //menu
     Texture2D menu = LoadTexture("assets/menu.png");
@@ -97,8 +97,12 @@ int main() {
     Sound morcegoAtingido = LoadSound("assets/morcegoatingido.mp3");
     Sound esqueletoAtingido = LoadSound("assets/esqueletoAtingido.mp3");
     Sound sapoAtingido = LoadSound("assets/sapoAtingido.mp3");
-    Sound fantasmaAtingido = LoadSound("assents/fantasmaAtingido.mp3");
-    PlaySound(musicaFundo);
+    Sound fantasmaAtingido = LoadSound("assets/fantasmaAtingido.mp3");
+    Sound ai = LoadSound("assets/playeratingido.mp3");
+    Sound champion = LoadSound("assets/wearethechampions.mp3");
+    Sound uLose =LoadSound("assets/Sadness and Sorrow.mp3");
+    PlaySound(musicaFundo); 
+    
 
     //morcego - 0
     Texture2D morcego = LoadTexture("assets/bat.png");
@@ -145,7 +149,7 @@ int main() {
     int atkdelayInimigo = 0;
     while(!WindowShouldClose()) {
 
-        
+       
        
         hitbox.x = player.position.x;
         hitbox.y = player.position.y;
@@ -165,8 +169,10 @@ int main() {
         if(gamestate == -1){
             BeginDrawing();
                 DrawTexture(menu, 0, 0, WHITE);
-            EndDrawing();
-
+                PauseSound(champion);
+                PauseSound(uLose);
+                ResumeSound(musicaFundo);
+            EndDrawing();            
             if(IsKeyPressed(KEY_ENTER)){
                 gamestate = 2;
             }
@@ -210,11 +216,13 @@ int main() {
             else{
                 flagDefesa = 0;
             }*/
-            if(IsKeyUp(KEY_A) && IsKeyUp(KEY_D) && IsKeyUp(KEY_W) && IsKeyUp(KEY_S) && flagMovimento == 1){
+            if(IsKeyDown(KEY_A) && IsKeyDown(KEY_D) && IsKeyDown(KEY_W) && IsKeyDown(KEY_S) && flagMovimento == 1){
                 flagParado = 1;
+                
             }
-            if(IsKeyUp(KEY_A) && IsKeyUp(KEY_D) && IsKeyUp(KEY_W) && IsKeyUp(KEY_S) && flagMovimento == -1){
+            if(IsKeyDown(KEY_A) && IsKeyDown(KEY_D) && IsKeyDown(KEY_W) && IsKeyDown(KEY_S) && flagMovimento == -1){
                 flagParado = 2;
+                
             }
             
             if(IsKeyDown(KEY_SPACE) && atkdelay <= 0) {
@@ -293,12 +301,15 @@ int main() {
 
                     if(CheckCollisionCircles((Vector2){player.position.x + 30, player.position.y + 25}, player.size, enemies[i].position, enemies[i].size) && atkdelayInimigo <= 0 && flagDefesa == 0) {\
                         atkdelayInimigo = 40;
+                        PlaySound(ai);
                         player.health--;
                         framesVida++;
                         framesVida = framesVida % maxFramesVida;
                         if(player.health == 0){
                         gamestate = 1;
                         flagMorte = 1;
+                        PauseSound(musicaFundo);
+                        PlaySound(uLose);
                         }
                     }
                     if(CheckCollisionCircleRec(enemies[i].position, enemies[i].size, playerattack) && atktime > 0) {
@@ -369,11 +380,14 @@ int main() {
                 projectiles[i - 1].position.x += projectiles[i - 1].speed.x;
                 projectiles[i - 1].position.y += projectiles[i - 1].speed.y;
                 if(CheckCollisionCircles((Vector2){player.position.x + 30, player.position.y + 25}, player.size, projectiles[i - 1].position, projectiles[i - 1].size) && atkdelayInimigo <= 0 && flagDefesa == 0) {\
+                    PlaySound(ai);
                     atkdelayInimigo = 40;
                     player.health--;
                     framesVida++;
                     framesVida = framesVida % maxFramesVida;
                     if(player.health == 0){
+                    PauseSound(musicaFundo);
+                    PlaySound(uLose);
                     gamestate = 1;
                     flagMorte = 1;
                     }
@@ -441,11 +455,13 @@ int main() {
                 framesVida = 0;
                 gamestate = -1;
             }
+            
             BeginDrawing();
                 ClearBackground(GRAY);
                 DrawTexture(mapa, 0, 0, WHITE);
                 DrawTextureRec(mortePersonagem, (Rectangle){(mortePersonagem.width/maxFramesMorte) * frameMorte, mortePersonagem.height/2, mortePersonagem.width/maxFramesMorte, mortePersonagem.height/2}, (Vector2){player.position.x, player.position.y}, WHITE);
                 DrawTexture(perdeu, 0, 0, WHITE);
+                
             EndDrawing();
         }
 
@@ -526,6 +542,8 @@ int main() {
             BeginDrawing();
                 ClearBackground(GREEN);
                 DrawTexture(ganhou, 0, 0, WHITE);
+                PauseSound(musicaFundo);
+                PlaySound(champion);
             EndDrawing();
         }
 
@@ -545,10 +563,13 @@ int main() {
     UnloadTexture(ganhou);
     free(enemies);
     UnloadSound(playersoundAtaque); 
+    UnloadSound(ai); 
     UnloadSound(morcegoAtingido);
     UnloadSound(fantasmaAtingido);
     UnloadSound(sapoAtingido);
     UnloadSound(esqueletoAtingido);
+    UnloadSound(uLose);
+    UnloadSound(champion);
     UnloadSound(musicaFundo);
     CloseAudioDevice();
     CloseWindow();
