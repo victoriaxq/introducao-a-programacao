@@ -6,7 +6,7 @@
 
 #define WINDOW_WIDTH 1008
 #define WINDOW_HEIGHT 608
-#define PROJ_MAX 100
+#define PROJ_MAX 500
 
 typedef struct {
     Vector2 position;
@@ -445,28 +445,85 @@ int main() {
                     }
                     // Atira projeteis
                     if(enemies[i].atkspeed <= 0) {
-                        if(projnum < PROJ_MAX) {
-                            for(int x = 0; x < 2; x++) {
+                        for(int x = 0; x < 2; x++) {
+                            if(projnum < PROJ_MAX) {
                                 projectiles[projnum].position = enemies[i].position;
                                 projectiles[projnum].size = 5;
                                 projectiles[projnum].speed.x = 4*x - 2;
                                 projectiles[projnum].speed.y = 0;
                                 projnum++;
                             }
-                            for(int x = 0; x < 2; x++) {
+                        }
+                        for(int x = 0; x < 2; x++) {
+                            if(projnum < PROJ_MAX) {
                                 projectiles[projnum].position = enemies[i].position;
                                 projectiles[projnum].size = 5;
                                 projectiles[projnum].speed.x = 0;
                                 projectiles[projnum].speed.y = 4*x - 2;
                                 projnum++;
                             }
-                            enemies[i].atkspeed = 150;
                         }
+                        if(enemies[i].enemystate == 2) {
+                            for(int x = 0; x < 2; x++) {
+                                if(projnum < PROJ_MAX) {
+                                    projectiles[projnum].position = enemies[i].position;
+                                    projectiles[projnum].size = 5;
+                                    projectiles[projnum].speed.x = 4*x - 2;
+                                    projectiles[projnum].speed.y = 4*x - 2;
+                                    projnum++;
+                                }
+                            }
+                            for(int x = 0; x < 2; x++) {
+                                if(projnum < PROJ_MAX) {
+                                    projectiles[projnum].position = enemies[i].position;
+                                    projectiles[projnum].size = 5;
+                                    projectiles[projnum].speed.x = -(4*x - 2);
+                                    projectiles[projnum].speed.y = 4*x - 2;
+                                    projnum++;
+                                }
+                            }
+                        }
+                        enemies[i].atkspeed = 150;
                     }
                     else {
                         enemies[i].atkspeed -= 1;
                     }
 
+                    if(CheckCollisionCircleRec(enemies[i].position, enemies[i].size, playerattack) && atktime > 0) {
+                        PlaySound(morcegoAtingido);
+                        enemies = remover(enemies, i, &numinimigos);
+                    }
+                }
+                else if(enemies[i].type == 4) {
+                    if(enemies[i].atkspeed <= 0) {
+                        if(enemies[i].enemystate == 2) {
+                            for(int x = 0; x < 5; x++) {
+                                if(projnum < PROJ_MAX) {
+                                    projectiles[projnum].position = enemies[i].position;
+                                    projectiles[projnum].size = 5;
+                                    projectiles[projnum].speed.x = norm(player.position.x + x*30 - 30 - enemies[i].position.x, player.position.y + x*25 - 25 - enemies[i].position.y);
+                                    projectiles[projnum].speed.y = norm(player.position.y + x*25 - 25 - enemies[i].position.y, player.position.x + x*30 - 30 - enemies[i].position.x);
+                                    projnum++;
+                                }
+                            }
+                        }
+                        else {
+                            for(int x = 0; x < 3; x++) {
+                                if(projnum < PROJ_MAX) {
+                                    projectiles[projnum].position = enemies[i].position;
+                                    projectiles[projnum].size = 5;
+                                    projectiles[projnum].speed.x = norm(player.position.x + x*30 - enemies[i].position.x, player.position.y + x*25 - enemies[i].position.y);
+                                    projectiles[projnum].speed.y = norm(player.position.y + x*25 - enemies[i].position.y, player.position.x + x*30 - enemies[i].position.x);
+                                    projnum++;
+                                }
+                            }
+                        }
+                        enemies[i].atkspeed = 120;
+                    }
+                    else {
+                        enemies[i].atkspeed -= 1;
+                    }
+                    // Receber dano
                     if(CheckCollisionCircleRec(enemies[i].position, enemies[i].size, playerattack) && atktime > 0) {
                         PlaySound(morcegoAtingido);
                         enemies = remover(enemies, i, &numinimigos);
@@ -624,7 +681,7 @@ int main() {
             
             projnum = 0;
             contadorOndas++;
-            if(contadorOndas > 5) {
+            if(contadorOndas > 10) {
                 PauseSound(musicaFundo);
                 PlaySound(champion);
                 gamestate = 3;
@@ -633,12 +690,12 @@ int main() {
                 int wavetime = 180;
                 int pontosinimigo = 5 + contadorOndas * 3;
                 while(pontosinimigo > 0) {
-                    int novoinimigo = GetRandomValue(1, 7);
+                    int novoinimigo = GetRandomValue(1, 6);
                     switch(novoinimigo)
                     {
-                        case 1 : //Morcego-0
+                        case 1 : //esqueleto
                             if(pontosinimigo >= 1 ){
-                                pontosinimigo = pontosinimigo - 1;
+                                pontosinimigo = pontosinimigo - 4;
                                 numinimigos++;
                                 enemies = (Enemy*) realloc(enemies, numinimigos * sizeof(Enemy));
                                 if(enemies == NULL) exit(1);
@@ -647,12 +704,12 @@ int main() {
                                 enemies[numinimigos - 1].speed = 1.0f;
                                 enemies[numinimigos - 1].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
                                 enemies[numinimigos -1].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
-                                enemies[numinimigos - 1].textura = 0;
+                                enemies[numinimigos - 1].textura = 5;
                                 enemies[numinimigos - 1].dano = 1;
                             }
                         break;
-                        case 2 : //Morcego-1
-                            if(pontosinimigo >= 3 ){
+                        case 2 : //Morcego atirador
+                            if(pontosinimigo >= 2 && contadorOndas < 4){
                                 pontosinimigo = pontosinimigo - 3;
                                 numinimigos++;
                                 enemies = (Enemy*) realloc(enemies, numinimigos * sizeof(Enemy));
@@ -666,45 +723,49 @@ int main() {
                                 enemies[numinimigos - 1].dano = 1;
                             }
                         break;
-                        case 3: //morcego branco
-                            if(pontosinimigo >= 1 ){
-                                pontosinimigo = pontosinimigo - 1;
+                        case 3 : //Morcego atirador 2
+                            if(pontosinimigo >= 2 && contadorOndas >= 4 && contadorOndas < 7){
+                                pontosinimigo = pontosinimigo - 3;
                                 numinimigos++;
                                 enemies = (Enemy*) realloc(enemies, numinimigos * sizeof(Enemy));
                                 if(enemies == NULL) exit(1);
-                                enemies[numinimigos - 1].type = 0;
+                                enemies[numinimigos - 1].type = 4;
                                 enemies[numinimigos - 1].size = 4;
-                                enemies[numinimigos - 1].speed = 1.0f;
+                                enemies[numinimigos - 1].atkspeed = 60;
+                                enemies[numinimigos - 1].enemystate = 1;
                                 enemies[numinimigos - 1].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
-                                enemies[numinimigos -1].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
+                                enemies[numinimigos - 1].position.y = GetRandomValue(90, WINDOW_HEIGHT - 135);
                                 enemies[numinimigos - 1].textura = 1;
                                 enemies[numinimigos - 1].dano = 1;
                             }
                         break;
-                        case 4: //morcego vermelho
-                            if(pontosinimigo >= 1 ){
-                                pontosinimigo = pontosinimigo - 1;
+                        case 4 : //Morcego atirador 3
+                            if(pontosinimigo >= 2 && contadorOndas >= 7){
+                                pontosinimigo = pontosinimigo - 3;
                                 numinimigos++;
                                 enemies = (Enemy*) realloc(enemies, numinimigos * sizeof(Enemy));
                                 if(enemies == NULL) exit(1);
-                                enemies[numinimigos - 1].type = 0;
+                                enemies[numinimigos - 1].type = 4;
                                 enemies[numinimigos - 1].size = 4;
-                                enemies[numinimigos - 1].speed = 1.0f;
+                                enemies[numinimigos - 1].atkspeed = 60;
+                                enemies[numinimigos - 1].enemystate = 2;
                                 enemies[numinimigos - 1].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
-                                enemies[numinimigos -1].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
+                                enemies[numinimigos - 1].position.y = GetRandomValue(90, WINDOW_HEIGHT - 135);
                                 enemies[numinimigos - 1].textura = 2;
                                 enemies[numinimigos - 1].dano = 1;
                             }
                         break;
                         case 5: // fantasma verde
-                            if(pontosinimigo >= 2 ){
+                            if(pontosinimigo >= 3 && contadorOndas > 3 && contadorOndas <= 6){
                                 pontosinimigo = pontosinimigo - 2;
                                 numinimigos++;
                                 enemies = (Enemy*) realloc(enemies, numinimigos * sizeof(Enemy));
                                 if(enemies == NULL) exit(1);
                                 enemies[numinimigos - 1].type = 3;
                                 enemies[numinimigos - 1].size = 4;
-                                enemies[numinimigos - 1].speed = 1.0f;
+                                enemies[numinimigos - 1].speed = 0.5f;
+                                enemies[numinimigos - 1].atkspeed = 60;
+                                enemies[numinimigos - 1].enemystate = 1;
                                 enemies[numinimigos - 1].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
                                 enemies[numinimigos -1].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
                                 enemies[numinimigos - 1].textura = 3;
@@ -712,33 +773,20 @@ int main() {
                             }
                         break;
                         case 6: //fantasma rosa
-                            if(pontosinimigo >= 2 ){
+                            if(pontosinimigo >= 3 && contadorOndas > 6){
                                 pontosinimigo = pontosinimigo - 2;
                                 numinimigos++;
                                 enemies = (Enemy*) realloc(enemies, numinimigos * sizeof(Enemy));
                                 if(enemies == NULL) exit(1);
                                 enemies[numinimigos - 1].type = 3;
                                 enemies[numinimigos - 1].size = 4;
-                                enemies[numinimigos - 1].speed = 1.0f;
+                                enemies[numinimigos - 1].speed = 0.5f;
+                                enemies[numinimigos - 1].atkspeed = 60;
+                                enemies[numinimigos - 1].enemystate = 2;
                                 enemies[numinimigos - 1].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
                                 enemies[numinimigos -1].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
                                 enemies[numinimigos - 1].textura = 4;
                                 enemies[numinimigos - 1].dano = 1;
-                            }
-                            break;
-                        case 7 : //esqueleto
-                            if(pontosinimigo >= 4 ){
-                                pontosinimigo = pontosinimigo - 4;
-                                numinimigos++;
-                                enemies = (Enemy*) realloc(enemies, numinimigos * sizeof(Enemy));
-                                if(enemies == NULL) exit(1);
-                                enemies[numinimigos - 1].type = 0;
-                                enemies[numinimigos - 1].size = 4;
-                                enemies[numinimigos - 1].speed = 1.0f;
-                                enemies[numinimigos - 1].position.x = GetRandomValue(20, WINDOW_WIDTH - 90);
-                                enemies[numinimigos -1].position.y = GetRandomValue(75, WINDOW_HEIGHT - 135);
-                                enemies[numinimigos - 1].textura = 5;
-                                enemies[numinimigos - 1].dano = 2;
                             }
                             break;
                     }
