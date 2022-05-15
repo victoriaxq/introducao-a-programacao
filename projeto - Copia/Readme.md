@@ -1,5 +1,5 @@
 
-## A (k)night in a dungeon:
+## One (k)night in a dungeon:
 Projeto da disciplina de Introdução a Programação no qual consiste em criar um jogo em C utilizando a biblioteca raylib.
 
 Participantes do projeto: Luis Felipe Oliveira, Filipe Maciel, Victoria Xavier, Emily Marques e Amanda Cristina Fernandes.
