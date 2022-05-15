@@ -569,9 +569,6 @@ int main() {
             BeginDrawing(); 
                 ClearBackground(GRAY);
                 DrawTexture(mapa, 0, 0, WHITE);
-                if(atktime > 0) {
-                    DrawRectangleRec(playerattack, BLUE);
-                }
                 for(int i = 0; i < projnum; i++) {
                     DrawCircle(projectiles[i].position.x, projectiles[i].position.y, projectiles[i].size, RED);
                 }
@@ -869,9 +866,6 @@ int main() {
                         for(int i = 0; i < numinimigos; i++) {
                             DrawCircle(enemies[i].position.x, enemies[i].position.y, 10, Fade(RED, 0.01 * ((wavetime % 60) + 1)));
                         }   
-                        if(atktime > 0) {
-                            DrawRectangleRec(playerattack, BLUE);
-                        }
                         for(int i = 0; i < projnum; i++) {
                             DrawCircle(projectiles[i].position.x, projectiles[i].position.y, projectiles[i].size, RED);
                         }
