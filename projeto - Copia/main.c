@@ -175,9 +175,9 @@ int main() {
                 frameMorte++;
             }
         }
+         framePlayer = framePlayer % maxFramesPlayer;
          frameMorcego = frameMorcego % maxFramesMorcego;
          frameCaveira = frameCaveira % maxFramesEsqueleto;
-         framePlayer = framePlayer % maxFramesPlayer;
          frameMorte = frameMorte % maxFramesMorte;
         // Menu
         if(gamestate == -1){
@@ -790,6 +790,12 @@ int main() {
                 }
 
                 while(wavetime > 0) {
+                    timer += GetFrameTime();
+                    if(timer >= 0.2f){
+                        timer = 0.0f;
+                        framePlayer += 1;
+                    }
+                    framePlayer = framePlayer % maxFramesPlayer;
 
                     if(IsKeyDown(KEY_S) && !CheckCollisionRecs(paredes[3], hitbox)) {
                         player.position.y += player.speed;
@@ -948,8 +954,11 @@ int main() {
     UnloadSound(sapoAtingido);
     UnloadSound(esqueletoAtingido);
     UnloadSound(musicaFundo);
+    UnloadSound(uLose);
+    UnloadSound(ai);
+    UnloadSound(champion);
+    UnloadTexture(vida);
     CloseAudioDevice();
     CloseWindow();
-
     return 0;
 }
